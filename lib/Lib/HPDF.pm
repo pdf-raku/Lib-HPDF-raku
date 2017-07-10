@@ -175,14 +175,17 @@ class HPDF_MMgr is repr('CPointer') {
 }
 
 class HPDF_Stream is repr('CPointer') {
+    method Write(Blob $data, HPDF_UINT $size)
+        returns HPDF_STATUS
+        is symbol('HPDF_Stream_Write')
+        is native {*}
+}
+
+class HPDF_MemStream is HPDF_Stream is repr('CPointer') {
     method GetBufPtr(HPDF_UINT    $index,
                      HPDF_UINT    $length is rw)
         returns CArray[uint8]
         is symbol('HPDF_MemStream_GetBufPtr')
-        is native {*}
-    method Write(Blob $data, HPDF_UINT $size)
-        returns HPDF_STATUS
-        is symbol('HPDF_Stream_Write')
         is native {*}
 }
 
@@ -217,15 +220,13 @@ class MMgr {
 
     submethod TWEAK(
         Error:D :$error!,
-        UInt :$size = 100_000,
+        UInt :$size = 0,
         Pointer :$alloc_fn,
         Pointer :$free_fn,
     ) {
         $!obj = HPDF_MMgr_New($error.obj, $size, $alloc_fn, $free_fn);
     }     
 }
-
-my class Stream { }
 
 our sub stat(Mu $status) {
     warn $status.perl;
@@ -234,15 +235,17 @@ our sub stat(Mu $status) {
     $res
 }
 
+my class Stream { }
+
 class MemStream is Stream {
-    has HPDF_Stream $.obj;
+    has HPDF_MemStream $.obj;
     sub HPDF_MemStream_New(HPDF_MMgr  $mmgr,
                            HPDF_UINT  $buf_siz)
-    returns HPDF_Stream
+    returns HPDF_MemStream
     is native(libhpdf) {*};
     submethod TWEAK(
         MMgr :$mmgr!,
-        UInt :$size = 10_000,
+        UInt :$size = 0,
     ) {
         $!obj = HPDF_MemStream_New($mmgr.obj, $size);
     }
