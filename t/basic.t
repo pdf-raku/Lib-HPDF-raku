@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 4;
+plan 6;
 
 use Lib::HPDF;
 use NativeCall;
@@ -17,13 +17,12 @@ is $b-true.so, True;
 
 my $b-false = Lib::HPDF::Boolean.new: :$mmgr, :value(False);
 is ?$b-false, False;
+is $b-false.so, False;
 
 my $stream = Lib::HPDF::MemStream.new: :$mmgr;
 
 $b-true.write($stream);
 $stream.write(' ');
 $b-false.write($stream);
-is $b-false.so, False;
-
 my $ptr = $stream.Buf;
 is $ptr.decode("latin-1"), "true false";
