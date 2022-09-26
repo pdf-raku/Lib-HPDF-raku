@@ -5,12 +5,7 @@ use LibraryMake;
 use NativeCall;
 
 # Find our compiled library.
-sub libhpdf is export(:libhpdf) {
-    state $ = do {
-	my $so = get-vars('')<SO>;
-	~(%?RESOURCES{"library/libhpdf$so"});
-    }
-}
+constant $LIB-HPDF = 'hpdf';
 
 constant HPDF_BOOL   = int32;
 constant HPDF_UINT   = uint32;
@@ -171,14 +166,14 @@ class HPDF_Error is repr('CStruct') {
 class HPDF_MMgr is repr('CPointer') {
     method DESTROY
         is symbol('HPDF_MMgr_Free')
-        is native {*}
+        is native($LIB-HPDF) {*}
 }
 
 class HPDF_Stream is repr('CPointer') {
     method Write(Blob $data, HPDF_UINT $size)
         returns HPDF_STATUS
         is symbol('HPDF_Stream_Write')
-        is native {*}
+        is native($LIB-HPDF) {*}
 }
 
 class HPDF_MemStream is HPDF_Stream is repr('CPointer') {
@@ -186,7 +181,7 @@ class HPDF_MemStream is HPDF_Stream is repr('CPointer') {
                      HPDF_UINT    $length is rw)
         returns CArray[uint8]
         is symbol('HPDF_MemStream_GetBufPtr')
-        is native {*}
+        is native($LIB-HPDF) {*}
 }
 
 class HPDF_Obj is repr('CStruct') {
@@ -196,7 +191,7 @@ class HPDF_Obj is repr('CStruct') {
     method write(HPDF_Stream $stream)
         returns HPDF_STATUS
         is symbol('HPDF_Obj_Write')
-        is native {*}
+        is native($LIB-HPDF) {*}
 }
 
 class HPDF_Boolean is repr('CStruct') 
@@ -216,7 +211,7 @@ class MMgr {
                        HPDF_Alloc_Func  $alloc_fn,
                        HPDF_Free_Func   $free_fn)
         returns HPDF_MMgr
-        is native(libhpdf) {*};
+        is native($LIB-HPDF) {*};
 
     submethod TWEAK(
         Error:D :$error!,
@@ -229,7 +224,6 @@ class MMgr {
 }
 
 our sub stat(Mu $status) {
-    warn $status.perl;
     my $res = HPDF_STATUS_CODE($status) // $status;
     fail($res) if $status;
     $res
@@ -242,7 +236,7 @@ class MemStream is Stream {
     sub HPDF_MemStream_New(HPDF_MMgr  $mmgr,
                            HPDF_UINT  $buf_siz)
     returns HPDF_MemStream
-    is native(libhpdf) {*};
+    is native($LIB-HPDF) {*};
     submethod TWEAK(
         MMgr :$mmgr!,
         UInt :$size = 0,
@@ -269,7 +263,7 @@ class Boolean is Object does Bool {
     sub HPDF_Boolean_New(HPDF_MMgr  $mmgr,
                          HPDF_BOOL  $value)
         returns HPDF_Boolean
-        is native(libhpdf) {*}
+        is native($LIB-HPDF) {*}
     method Bool { ? $!obj.value }
     submethod TWEAK(MMgr :$mmgr!, :$value!) {
         $!obj = HPDF_Boolean_New($mmgr.obj, $value)

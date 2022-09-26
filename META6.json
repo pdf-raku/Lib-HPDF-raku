@@ -5,18 +5,13 @@
   "name"          : "Lib::HPDF",
   "tags"          : [ ], 
   "version"       : "0.0.1",
-  "auth"          : "github:p6-pdf",
-  "description"   : "Fast Base 64 encoding and decoding (eager)",
-  "source-url"    : "git://github.com/p6-pdf/HPDF-p6.git",
+  "auth"          : "zef:dwarring",
+  "description"   : "LibHaru (PDF Library) bindings",
+  "source-url"    : "git://github.com/pdf-raku/Lib-HPDF-raku.git",
   "depends"       : [ "LibraryMake" ],
   "build-depends" : [ ],
   "test-depends"  : [ ],
   "provides"      : {
-      "Base64::Native" : "lib/Lib/HPDF.pm"
-   },
-  "resources" : [
-    "library/libhpdf.so",
-    "library/libhpdf.dll",
-    "library/libhpdf.dylib"
-  ]
+      "Lib::HPDF" : "lib/Lib/HPDF.rakumod"
+   }
 }
